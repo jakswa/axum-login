@@ -67,3 +67,8 @@ where
         None
     }
 }
+
+#[derive(Debug, PartialEq, Clone, PartialOrd)]
+pub enum DefaultRole {
+    User,
+}
