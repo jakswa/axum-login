@@ -142,7 +142,7 @@ where
         if let Some(role) = role {
             RangeBounds::contains(self, &role)
         } else {
-            false
+            role.is_none()
         }
     }
 }
@@ -186,21 +186,25 @@ where
     ) -> Result<(), Response<Self::ResponseBody>> {
         let user = request
             .extensions()
-            .get::<User>()
+            .get::<Option<User>>()
             .expect("Auth extension missing. Is the auth layer installed?");
 
-        if self.role_bounds.contains(user.get_role()) {
-            let user = user.clone();
-            request.extensions_mut().insert(user);
+        match user {
+            Some(user) if self.role_bounds.contains(user.get_role()) => {
+                let user = user.clone();
+                request.extensions_mut().insert(user);
 
-            Ok(())
-        } else {
-            let unauthorized_response = Response::builder()
-                .status(http::StatusCode::UNAUTHORIZED)
-                .body(Default::default())
-                .unwrap();
+                Ok(())
+            }
 
-            Err(unauthorized_response)
+            _ => {
+                let unauthorized_response = Response::builder()
+                    .status(http::StatusCode::UNAUTHORIZED)
+                    .body(Default::default())
+                    .unwrap();
+
+                Err(unauthorized_response)
+            }
         }
     }
 }
