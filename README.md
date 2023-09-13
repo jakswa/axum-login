@@ -103,6 +103,9 @@ async fn main() {
             .fetch_one(&mut conn)
             .await
             .unwrap();
+
+        // verify the user's password hash here
+
         auth.login(&user).await.unwrap();
     }
 
